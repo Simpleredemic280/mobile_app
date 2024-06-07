@@ -92,11 +92,11 @@ class HeartBeatCheckScreen(Screen):
         self.timer_event = Clock.schedule_interval(self.timerTick, 0.1)
 
     def next(self):
-        self.manager.current = 'set'
+        self.manager.current = 'set_check'
 
 class SetCheckScreen(Screen):
-    def __init__(self, name="set"):
-        super().__init__(name="set")
+    def __init__(self, name="set_check"):
+        super().__init__(name="set_check")
         instr = Label(text="Зробити 30 присідань за 45 сек.")
         self.next_button = Button(text="Next", size_hint=(0.4, None), height='60sp', pos_hint={'center_x': 0.5})
         self.start_btn = Button(text="Почати вимірювання", size_hint=(0.4, None), height='60sp',pos_hint={'center_x': 0.5})
@@ -133,7 +133,6 @@ class SetCheckScreen(Screen):
             self.timer.text = str(round(self.timer_value, 1))
         else:
             self.next_button.set_disabled(False)
-            self.results_input.set_disabled(False)
             return False
 
     def start_timer(self):
@@ -193,7 +192,57 @@ class SeatSetScreen(Screen):
         self.timer_event = Clock.schedule_interval(self.timerTick, 0.1)
 
     def next(self):
+        self.manager.current = 'check_rest'
+
+
+class CheckRestScreen(Screen):
+    def __init__(self, name="check_rest"):
+        super().__init__(name="check_rest")
+        instr = Label(text="Відпочити 30 сек.")
+        self.next_button = Button(text="Next", size_hint=(0.4, None), height='60sp', pos_hint={'center_x': 0.5})
+        self.start_btn = Button(text="Почати вимірювання", size_hint=(0.4, None), height='60sp',pos_hint={'center_x': 0.5})
+        self.timer_value = 30
+        self.timer = Label(text=str(self.timer_value), size_hint=(0.1, 1))
+        self.timer_event = None
+
+        self.next_button.on_press = self.next
+        self.start_btn.on_press = self.start_timer
+
+        self.next_button.set_disabled(True)
+
+        line1 = BoxLayout()
+        line2 = BoxLayout(orientation="vertical", spacing=5, size_hint=(1, 0.4))
+        line2_1 = BoxLayout(orientation="horizontal", size_hint=(0.4, 0.2), pos_hint={'center_x': 0.5})
+        layout = BoxLayout(orientation="vertical", padding=5)
+
+        line1.add_widget(instr)
+
+        line2_1.add_widget(self.start_btn)
+        line2_1.add_widget(self.timer)
+
+        line2.add_widget(line2_1)
+        line2.add_widget(self.next_button)
+
+        layout.add_widget(line1)
+        layout.add_widget(line2)
+
+        self.add_widget(layout)
+
+    def timerTick(self, dt):
+        if self.timer_value >= 0:
+            self.timer_value -= 0.1
+            self.timer.text = str(round(self.timer_value, 1))
+        else:
+            self.next_button.set_disabled(False)
+            return False
+
+    def start_timer(self):
+        self.start_btn.set_disabled(True)
+        self.timer_event = Clock.schedule_interval(self.timerTick, 0.1)
+
+    def next(self):
         self.manager.current = 'rest'
+
 
 class RestScreen(Screen):
     def __init__(self, name="rest"):
@@ -279,7 +328,9 @@ class MyApp(App):
         sm = ScreenManager()
         sm.add_widget(MainScreen())
         sm.add_widget(HeartBeatCheckScreen())
+        sm.add_widget(SetCheckScreen())
         sm.add_widget(SeatSetScreen())
+        sm.add_widget(CheckRestScreen())
         sm.add_widget(RestScreen())
         sm.add_widget(ResultsScreen())
         return sm
